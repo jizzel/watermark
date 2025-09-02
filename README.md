@@ -34,12 +34,12 @@ npm install
 
 3. Start infrastructure services:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 4. Copy environment variables:
 ```bash
-cp .env.example .env
+cp example.env .env
 ```
 
 ## Running the Application

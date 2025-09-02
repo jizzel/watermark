@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Watermark Service</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f5f7;
+      color: #172b4d;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h3, h4 {
+      color: #091e42;
+    }
+
+    .form-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #dfe1e6;
+    }
+
+    .form-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="file"], input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #c1c7d0;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: #fafbfc;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4c9aff;
+      box-shadow: 0 0 0 1px #4c9aff;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 4px;
+      background-color: #0052cc;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0065ff;
+    }
+
+    button[type="submit"]:disabled {
+      background-color: #a5adba;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #results {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background-color: #f4f5f7;
+      border-radius: 8px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      background-color: #dfe1e6;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-bar {
+      height: 20px;
+      width: 0;
+      background-color: #0052cc;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+      transition: width 0.3s ease-in-out;
+    }
+
+    #result-image-container {
+      margin-top: 1.5rem;
+    }
+
+    #result-image {
+      max-width: 100%;
+      border: 1px solid #dfe1e6;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    #error-container {
+      color: #de350b;
+      background-color: #ffebe6;
+      border: 1px solid #ffbdad;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Watermark Service</h1>
+  <form id="watermark-form">
+    <!-- Main Image Upload -->
+    <div class="form-section">
+      <h3>1. Upload Your Image</h3>
+      <input type="file" id="main-image" name="file" accept="image/jpeg, image/png, image/webp" required>
+    </div>
+
+    <!-- Watermark Type -->
+    <div class="form-section">
+      <h3>2. Choose Watermark Type</h3>
+      <label><input type="radio" name="watermarkType" value="text" checked> Text</label>
+      <label><input type="radio" name="watermarkType" value="image"> Image</label>
+    </div>
+
+    <!-- Text Watermark Options -->
+    <div id="text-options" class="form-section options-panel">
+      <h3>3. Text Watermark Options</h3>
+      <div class="form-group">
+        <label for="text">Watermark Text</label>
+        <input type="text" id="text" value="© My Brand">
+      </div>
+      <div class="form-group">
+        <label for="fontSize">Font Size</label>
+        <input type="number" id="fontSize" value="48">
+      </div>
+      <div class="form-group">
+        <label for="text-opacity">Opacity (0.0 - 1.0)</label>
+        <input type="number" id="text-opacity" step="0.1" min="0" max="1" value="0.7">
+      </div>
+      <div class="form-group">
+        <label for="text-gravity">Position (Gravity)</label>
+        <select id="text-gravity">
+          <option value="southeast" selected>Southeast</option>
+          <option value="southwest">Southwest</option>
+          <option value="northeast">Northeast</option>
+          <option value="northwest">Northwest</option>
+          <option value="center">Center</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Image Watermark Options -->
+    <div id="image-options" class="form-section options-panel hidden">
+      <h3>3. Image Watermark Options</h3>
+      <div class="form-group">
+        <label for="watermark-image">Watermark Image</label>
+        <input type="file" id="watermark-image" accept="image/png, image/jpeg, image/webp">
+      </div>
+      <div class="form-group">
+        <label for="width">Watermark Width (px)</label>
+        <input type="number" id="width" value="150">
+      </div>
+      <div class="form-group">
+        <label for="image-opacity">Opacity (0.0 - 1.0)</label>
+        <input type="number" id="image-opacity" step="0.1" min="0" max="1" value="0.5">
+      </div>
+      <div class="form-group">
+        <label for="image-gravity">Position (Gravity)</label>
+        <select id="image-gravity">
+          <option value="southeast" selected>Southeast</option>
+          <option value="southwest">Southwest</option>
+          <option value="northeast">Northeast</option>
+          <option value="northwest">Northwest</option>
+          <option value="center">Center</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" id="submit-btn">Apply Watermark</button>
+  </form>
+
+  <!-- Results Section -->
+  <div id="results" class="hidden">
+    <h3>Processing Job</h3>
+    <p><strong>Job ID:</strong> <span id="job-id"></span></p>
+    <p><strong>Status:</strong> <span id="job-status"></span></p>
+    <div class="progress-bar-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <div id="result-image-container" class="hidden">
+      <h4>Result:</h4>
+      <a id="result-link" href="#" target="_blank">
+        <img id="result-image" src="" alt="Watermarked Image">
+      </a>
+    </div>
+    <div id="error-container" class="hidden">
+      <h4>Error:</h4>
+      <p id="error-details"></p>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const form = document.getElementById('watermark-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const watermarkTypeRadios = document.querySelectorAll('input[name="watermarkType"]');
+    const textOptionsPanel = document.getElementById('text-options');
+    const imageOptionsPanel = document.getElementById('image-options');
+    const mainImageInput = document.getElementById('main-image');
+    const watermarkImageInput = document.getElementById('watermark-image');
+
+    const resultsPanel = document.getElementById('results');
+    const jobIdSpan = document.getElementById('job-id');
+    const jobStatusSpan = document.getElementById('job-status');
+    const progressBar = document.getElementById('progress-bar');
+    const resultImageContainer = document.getElementById('result-image-container');
+    const resultImage = document.getElementById('result-image');
+    const resultLink = document.getElementById('result-link');
+    const errorContainer = document.getElementById('error-container');
+    const errorDetails = document.getElementById('error-details');
+
+    const API_BASE_URL = '/api';
+    let pollingInterval;
+
+    // --- Event Listeners ---
+
+    watermarkTypeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const isText = e.target.value === 'text';
+        textOptionsPanel.classList.toggle('hidden', !isText);
+        imageOptionsPanel.classList.toggle('hidden', isText);
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resetUI();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+
+      const watermarkType = document.querySelector('input[name="watermarkType"]:checked').value;
+      const endpoint = `${API_BASE_URL}/watermark/${watermarkType}`;
+
+      const formData = new FormData();
+      formData.append('file', mainImageInput.files[0]);
+
+      if (watermarkType === 'text') {
+        formData.append('text', document.getElementById('text').value);
+        formData.append('fontSize', document.getElementById('fontSize').value);
+        formData.append('opacity', document.getElementById('text-opacity').value);
+        formData.append('gravity', document.getElementById('text-gravity').value);
+      } else {
+        if (watermarkImageInput.files.length === 0) {
+          showError('Please select a watermark image.');
+          resetSubmitButton();
+          return;
+        }
+        formData.append('watermark', watermarkImageInput.files[0]);
+        formData.append('width', document.getElementById('width').value);
+        formData.append('opacity', document.getElementById('image-opacity').value);
+        formData.append('gravity', document.getElementById('image-gravity').value);
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          const errorMessage = Array.isArray(data.message) ? data.message.join(', ') : data.message;
+          throw new Error(errorMessage || 'An unknown error occurred.');
+        }
+
+        const jobId = data.jobId;
+        resultsPanel.classList.remove('hidden');
+        jobIdSpan.textContent = jobId;
+        jobStatusSpan.textContent = 'Queued';
+        submitBtn.textContent = 'Processing...';
+
+        pollJobStatus(jobId);
+
+      } catch (error) {
+        showError(error.message);
+        resetSubmitButton();
+      }
+    });
+
+    // --- Functions ---
+
+    function pollJobStatus(jobId) {
+      pollingInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/watermark/status/${jobId}`);
+          const job = await response.json();
+
+          updateStatusUI(job);
+
+          if (job.state === 'completed' || job.state === 'failed') {
+            clearInterval(pollingInterval);
+            resetSubmitButton();
+            if (job.state === 'completed') {
+              displayResult(job.returnValue.url);
+            } else {
+              showError(job.failedReason || 'Job failed for an unknown reason.');
+            }
+          }
+        } catch (error) {
+          clearInterval(pollingInterval);
+          showError('Failed to get job status. ' + error.message);
+          resetSubmitButton();
+        }
+      }, 2000); // Poll every 2 seconds
+    }
+
+    function updateStatusUI(job) {
+      jobStatusSpan.textContent = job.state;
+      const progress = job.progress || 0;
+      progressBar.style.width = `${progress}%`;
+      progressBar.textContent = `${progress}%`;
+    }
+
+    function displayResult(resultUrl) {
+      resultImageContainer.classList.remove('hidden');
+      resultImage.src = resultUrl;
+      resultLink.href = resultUrl;
+    }
+
+    function showError(message) {
+      resultsPanel.classList.remove('hidden');
+      errorContainer.classList.remove('hidden');
+      errorDetails.textContent = message;
+    }
+
+    function resetUI() {
+      if (pollingInterval) clearInterval(pollingInterval);
+      resultsPanel.classList.add('hidden');
+      resultImageContainer.classList.add('hidden');
+      errorContainer.classList.add('hidden');
+      resultImage.src = '';
+      resultLink.href = '#';
+      progressBar.style.width = '0%';
+      progressBar.textContent = '';
+    }
+
+    function resetSubmitButton() {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Apply Watermark';
+    }
+  });
+</script>
+</body>
+</html>

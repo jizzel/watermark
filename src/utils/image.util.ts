@@ -190,7 +190,7 @@ export class ImageUtil {
               255,
               255,
               255,
-              Math.floor(255 * (1 - clampedOpacity)),
+              Math.floor(255 * clampedOpacity),
             ]),
             raw: { width: 1, height: 1, channels: 4 },
             tile: true,

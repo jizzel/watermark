@@ -1,98 +1,127 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Watermark API Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A RESTful API service built with NestJS that applies watermarks to uploaded images. The service handles file uploads, applies text or image watermarks, and returns processed images with async processing support.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Text Watermarks**: Apply customizable text watermarks with font size, position, and opacity control
+- **Image Watermarks**: Apply image watermarks with resizing, positioning, and opacity options
+- **Async Processing**: Queue-based processing using BullMQ for handling large files
+- **Multiple Formats**: Support for JPEG, PNG, and WebP image formats
+- **Job Status Tracking**: Real-time status updates for watermarking jobs
+- **Swagger Documentation**: Interactive API documentation
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## API Endpoints
 
-## Project setup
+- `POST /api/watermark/text` - Apply text watermark to uploaded image
+- `POST /api/watermark/image` - Apply image watermark to uploaded image
+- `GET /api/watermark/status/:jobId` - Check processing status
 
+## Prerequisites
+
+- Node.js (v18 or higher)
+- Docker and Docker Compose
+- Redis (for queue management)
+- MongoDB (for job storage)
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
-
+3. Start infrastructure services:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker-compose up -d
 ```
 
-## Run tests
-
+4. Copy environment variables:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Running the Application
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run start:prod
+
+# Debug mode
+npm run start:debug
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Testing
 
-## Resources
+```bash
+# Unit tests
+npm run test
 
-Check out a few resources that may come in handy when working with NestJS:
+# E2E tests
+npm run test:e2e
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Test coverage
+npm run test:cov
+```
 
-## Support
+## Usage Examples
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Text Watermark
+```bash
+curl -X POST http://localhost:3000/api/watermark/text \
+  -F "file=@image.jpg" \
+  -F "text=© My Brand" \
+  -F "fontSize=48" \
+  -F "gravity=southeast" \
+  -F "opacity=0.7"
+```
 
-## Stay in touch
+### Image Watermark
+```bash
+curl -X POST http://localhost:3000/api/watermark/image \
+  -F "file=@image.jpg" \
+  -F "watermark=@logo.png" \
+  -F "gravity=southeast" \
+  -F "opacity=0.5" \
+  -F "width=150"
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Check Job Status
+```bash
+curl http://localhost:3000/api/watermark/status/{jobId}
+```
+
+## Configuration
+
+Environment variables in `.env`:
+
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Environment mode
+- `REDIS_URL` - Redis connection URL
+- `MONGO_URI` - MongoDB connection URI
+- `UPLOAD_DIR` - Directory for file uploads
+- `CONCURRENCY` - Queue processing concurrency
+
+## Architecture
+
+The service follows NestJS best practices with:
+
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Business logic and job management
+- **DTOs**: Data validation using class-validator
+- **Processors**: Background job processing with BullMQ
+- **Schemas**: MongoDB data models
+- **Utils**: Image processing utilities with Sharp
+
+## API Documentation
+
+Swagger documentation is available at `http://localhost:3000/api` when the server is running.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the MIT License.
+

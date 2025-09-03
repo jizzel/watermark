@@ -125,7 +125,3 @@ The service follows NestJS best practices with:
 
 Swagger documentation is available at `http://localhost:3000/api` when the server is running.
 
-## License
-
-This project is licensed under the MIT License.
-

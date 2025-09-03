@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Post,
   UploadedFile,
@@ -14,7 +15,12 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { multerConfig } from '../../../../app-config/configs/multer.config';
+import { memoryStorage } from 'multer';
+import {
+  type IStorage,
+  STORAGE_SERVICE,
+} from '../../../storage/storage.interface';
+import { multerOptions } from '../../../../app-config/configs/multer.config';
 import { TextWatermarkDto } from '../../dto/text-watermark.dto';
 import { ImageWatermarkDto } from '../../dto/image-watermark.dto';
 import {
@@ -36,10 +42,15 @@ import {
 @ApiTags('Watermark')
 @Controller('watermark')
 export class WatermarkController {
-  constructor(private readonly watermarkService: WatermarkService) {}
+  constructor(
+    private readonly watermarkService: WatermarkService,
+    @Inject(STORAGE_SERVICE) private readonly storageService: IStorage,
+  ) {}
 
   @Post('text')
-  @UseInterceptors(FileInterceptor('file', multerConfig))
+  @UseInterceptors(
+    FileInterceptor('file', { ...multerOptions, storage: memoryStorage() }),
+  )
   @ApiOperation({ summary: 'Apply a text watermark to an image' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -101,7 +112,8 @@ export class WatermarkController {
   ) {
     if (!file) throw new BadRequestException('Image file is required');
 
-    const jobId = await this.watermarkService.enqueueTextJob(file.path, body);
+    const inputPath = await this.storageService.upload(file, 'raw');
+    const jobId = await this.watermarkService.enqueueTextJob(inputPath, body);
 
     return { jobId };
   }
@@ -113,7 +125,10 @@ export class WatermarkController {
         { name: 'file', maxCount: 1 },
         { name: 'watermark', maxCount: 1 },
       ],
-      multerConfig,
+      {
+        ...multerOptions,
+        storage: memoryStorage(),
+      },
     ),
   )
   @ApiOperation({ summary: 'Apply an image watermark to another image' })
@@ -181,11 +196,17 @@ export class WatermarkController {
     if (!files.watermark?.[0])
       throw new BadRequestException('Watermark image file is required');
 
+    const mainImagePath = await this.storageService.upload(files.file[0], 'raw');
+    const watermarkImagePath = await this.storageService.upload(
+      files.watermark[0],
+      'raw',
+    );
+
     const jobId = await this.watermarkService.enqueueImageJob(
-      files.file[0].path,
+      mainImagePath,
       {
         ...body,
-        watermarkPath: files.watermark[0].path,
+        watermarkPath: watermarkImagePath,
       },
     );
 

@@ -101,10 +101,14 @@ Environment variables in `.env`:
 
 - `PORT` - Server port (default: 3000)
 - `NODE_ENV` - Environment mode
-- `REDIS_URL` - Redis connection URL
 - `MONGO_URI` - MongoDB connection URI
+- `REDIS_URL` - Redis connection URL
 - `UPLOAD_DIR` - Directory for file uploads
 - `CONCURRENCY` - Queue processing concurrency
+- `CLOUDFLARE_R2_ENDPOINT` - Endpoint
+- `CLOUDFLARE_R2_ACCESS_KEY_ID` - Access Key ID
+- `CLOUDFLARE_R2_SECRET_ACCESS_KEY` - Secret Access Key
+- `CLOUDFLARE_R2_BUCKET` - Bucket
 
 ## Architecture
 

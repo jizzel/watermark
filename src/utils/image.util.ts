@@ -1,15 +1,16 @@
 import sharp from 'sharp';
-import { promises as fs } from 'fs';
+// import * as Buffer from 'buffer';
+import { Buffer } from 'buffer';
 
 export class ImageUtil {
   /**
    * Apply a text watermark to an image.
-   * @param inputPath Path of the input image
-   * @param options Watermark options
-   * @param outputPath Path to save the processed image
+   * @param inputBuffer Buffer of the input imagre
+   * @param options Watermark options   *
+   * @returns A buffer of the processed image
    */
   static async applyTextWatermark(
-    inputPath: string,
+    inputBuffer: Buffer,
     options: {
       text: string;
       fontSize?: number;
@@ -25,8 +26,7 @@ export class ImageUtil {
         | 'center';
       opacity?: number;
     },
-    outputPath: string,
-  ): Promise<void> {
+  ): Promise<Buffer> {
     const {
       text,
       fontSize = 48,
@@ -34,7 +34,7 @@ export class ImageUtil {
       opacity = 0.7,
     } = options;
 
-    const image = sharp(inputPath);
+    const image = sharp(inputBuffer);
     const { width, height } = await image.metadata();
 
     if (!width || !height) {
@@ -117,21 +117,21 @@ export class ImageUtil {
       </svg>
     `;
 
-    await image
+    return image
       .composite([{ input: Buffer.from(svgText), top: 0, left: 0 }])
-      .toFile(outputPath);
+      .toBuffer();
   }
 
   /**
    * Apply an image watermark (logo) to an image.
-   * @param inputPath Path of the input image
+   * @param inputBuffer Buffer of the input image
+   * @param watermarkBuffer Buffer of the watermark image
    * @param options Watermark options
-   * @param outputPath Path to save the processed image
    */
   static async applyImageWatermark(
-    inputPath: string,
+    inputBuffer: Buffer,
+    watermarkBuffer: Buffer,
     options: {
-      watermarkPath: string;
       gravity?:
         | 'north'
         | 'northeast'
@@ -144,11 +144,9 @@ export class ImageUtil {
         | 'center';
       opacity?: number;
       width?: number;
-    },
-    outputPath: string,
-  ): Promise<void> {
+    }
+  ): Promise<Buffer> {
     const {
-      watermarkPath,
       gravity = 'southeast',
       opacity = 0.5,
       width: watermarkWidth,
@@ -157,27 +155,20 @@ export class ImageUtil {
     // Validate inputs
     const clampedOpacity = Math.max(0, Math.min(1, opacity));
 
-    const image = sharp(inputPath);
+    const image = sharp(inputBuffer);
     const { width: imageWidth, height: imageHeight } = await image.metadata();
 
     if (!imageWidth || !imageHeight) {
       throw new Error('Unable to determine main image dimensions');
     }
 
-    // Check if watermark file exists
-    try {
-      await fs.access(watermarkPath);
-    } catch (error) {
-      throw new Error(`Watermark file not found: ${watermarkPath} ${error}`);
-    }
-
     // Calculate watermark size
     const resizeWidth = watermarkWidth || Math.round(imageWidth * 0.25);
 
     // Process watermark with proper error handling
-    let watermarkBuffer: Buffer;
+    let processedWatermarkBuffer: Buffer;
     try {
-      watermarkBuffer = await sharp(watermarkPath)
+      processedWatermarkBuffer = await sharp(watermarkBuffer)
         .resize(resizeWidth, null, {
           fit: 'inside',
           withoutEnlargement: true,
@@ -203,30 +194,14 @@ export class ImageUtil {
       throw new Error(`Failed to process watermark image: ${error}`);
     }
 
-    await image
+    return image
       .composite([
         {
-          input: watermarkBuffer,
+          input: processedWatermarkBuffer,
           gravity: gravity as any, // Sharp's gravity type is more restrictive
           blend: 'over',
         },
       ])
-      .toFile(outputPath);
-  }
-
-  /**
-   * Delete a file safely
-   * @param filePath Path to the file to delete
-   */
-  static async deleteFile(filePath: string): Promise<void> {
-    try {
-      await fs.access(filePath); // Check if file exists first
-      await fs.unlink(filePath);
-    } catch (error: any) {
-      if (error.code !== 'ENOENT') {
-        console.warn(`Failed to delete file: ${filePath}`, error.message);
-      }
-      // Silently ignore if file doesn't exist
-    }
+      .toBuffer();
   }
 }

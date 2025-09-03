@@ -7,6 +7,7 @@ import { AppConfigModule } from './app-config/app-config.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/all-exceptions/all-exceptions.filter';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AllExceptionsFilter } from './common/all-exceptions/all-exceptions.filt
     MongooseModule.forRoot(
       process.env.MONGO_URI || 'mongodb://localhost:27017/watermark',
     ),
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [
